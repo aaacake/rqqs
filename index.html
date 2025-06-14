@@ -357,7 +357,7 @@
     
     <!-- 移动端顶部导航 -->
     <div id="top-nav">
-        <button id="mobileMenuBtn">☰☰ 导航菜单</button>
+        <button id="mobileMenuBtn">☰☰☰☰ 导航菜单</button>
     </div>
     
     <!-- 遮罩层 -->
@@ -493,6 +493,17 @@
         document.getElementById("toggleBtn").addEventListener("click", function() {
             const sidebar = document.getElementById("sidebar");
             sidebar.classList.toggle("collapsed");
+            
+            // 更新箭头显示状态
+            if (sidebar.classList.contains('collapsed')) {
+                document.querySelectorAll('.arrow').forEach(arrow => {
+                    arrow.style.display = 'none';
+                });
+            } else {
+                document.querySelectorAll('.arrow').forEach(arrow => {
+                    arrow.style.display = 'inline-block';
+                });
+            }
         });
         
         // 管理员登录功能
@@ -510,7 +521,6 @@
         document.getElementById("editBtn").addEventListener("click", function() {
             document.querySelectorAll(".editable").forEach(element => {
                 element.contentEditable = true;
-                element.focus();
                 element.classList.add('editing');
             });
             document.getElementById("saveBtn").style.display = "inline-block";
@@ -576,10 +586,6 @@
                     const subTitle = e.target.textContent;
                     document.getElementById('subTitle').textContent = subTitle;
                     
-                    
-                    
-                    document.getElementById('subDetails').textContent = contentMap[subTitle] || "这里是子栏目的详细内容";
-                    
                     // 显示子栏目内容区
                     document.getElementById('subContent').style.display = 'block';
                     
@@ -610,6 +616,7 @@
         // 首页菜单项点击
         document.querySelector('.nav-item:first-child').addEventListener('click', function() {
             document.getElementById('subContent').style.display = 'none';
+            document.getElementById('homeContent').style.display = 'block';
             
             // 在移动设备上关闭侧边栏
             if (window.innerWidth <= 768) {
@@ -651,28 +658,31 @@
                 
                 // 设置子栏目内容
                 const contentMap = {
-                        "旗舰产品": "这是我们公司的旗舰产品，代表了行业最高水平的技术和设计。它集成了多项专利技术，满足高端用户的所有需求。",
-                        "新品发布": "我们即将推出的新品融合了创新技术和用户反馈，性能提升30%，操作更便捷，设计更时尚。",
-                        "产品分类": "产品分为三大类：企业级解决方案、专业工具和个人应用，满足不同用户群体的需求。",
-                        "解决方案": "根据不同行业需求定制的完整解决方案，帮助客户实现数字化转型，提升业务效率。",
-                        "咨询服务": "专业咨询团队由行业专家组成，提供战略规划和业务优化服务，助力企业成长。",
-                        "技术支持": "7x24小时专业技术支持服务，快速响应客户需求，解决技术难题。",
-                        "定制开发": "根据客户特定需求进行软件开发，打造专属的业务系统，提升企业竞争力。",
-                        "培训服务": "提供产品使用培训和技能提升课程，帮助客户团队快速掌握技术，提高工作效率。",
-                        "公司简介": "我们是一家专注于企业服务的科技公司，成立于2010年，已服务超过500家企业客户。",
-                        "发展历程": "从初创公司到行业领导者，我们经历了多个重要发展阶段，始终坚持创新和客户至上的理念。",
-                        "团队介绍": "团队由来自知名企业的技术专家和行业资深人士组成，拥有丰富的经验和专业知识。",
-                        "荣誉资质": "获得了多项行业认证和奖项，包括ISO9001认证、国家高新技术企业等，证明了我们的专业实力。",
-                        "联系我们": "总部地址：北京市海淀区科技园88号\n电话：010-88889999\n邮箱：contact@company.com",
-                        "分支机构": "我们在上海、广州、深圳设有分公司，服务覆盖全国，为客户提供本地化支持。",
-                        "在线留言": "有任何问题或建议，请在此留言，我们会在24小时内回复您的问题。",
-                        "招贤纳士": "我们正在招聘以下职位：前端开发工程师、产品经理、销售代表。欢迎加入我们的团队！"
-                    };
+                    "旗舰产品": "这是我们公司的旗舰产品，代表了行业最高水平的技术和设计。它集成了多项专利技术，满足高端用户的所有需求。",
+                    "新品发布": "我们即将推出的新品融合了创新技术和用户反馈，性能提升30%，操作更便捷，设计更时尚。",
+                    "产品分类": "产品分为三大类：企业级解决方案、专业工具和个人应用，满足不同用户群体的需求。",
+                    "解决方案": "根据不同行业需求定制的完整解决方案，帮助客户实现数字化转型，提升业务效率。",
+                    "咨询服务": "专业咨询团队由行业专家组成，提供战略规划和业务优化服务，助力企业成长。",
+                    "技术支持": "7x24小时专业技术支持服务，快速响应客户需求，解决技术难题。",
+                    "定制开发": "根据客户特定需求进行软件开发，打造专属的业务系统，提升企业竞争力。",
+                    "培训服务": "提供产品使用培训和技能提升课程，帮助客户团队快速掌握技术，提高工作效率。",
+                    "公司简介": "我们是一家专注于企业服务的科技公司，成立于2010年，已服务超过500家企业客户。",
+                    "发展历程": "从初创公司到行业领导者，我们经历了多个重要发展阶段，始终坚持创新和客户至上的理念。",
+                    "团队介绍": "团队由来自知名企业的技术专家和行业资深人士组成，拥有丰富的经验和专业知识。",
+                    "荣誉资质": "获得了多项行业认证和奖项，包括ISO9001认证、国家高新技术企业等，证明了我们的专业实力。",
+                    "联系我们": "总部地址：北京市海淀区科技园88号\n电话：010-88889999\n邮箱：contact@company.com",
+                    "分支机构": "我们在上海、广州、深圳设有分公司，服务覆盖全国，为客户提供本地化支持。",
+                    "在线留言": "有任何问题或建议，请在此留言，我们会在24小时内回复您的问题。",
+                    "招贤纳士": "我们正在招聘以下职位：前端开发工程师、产品经理、销售代表。欢迎加入我们的团队！"
+                };
                 
                 document.getElementById('subDetails').textContent = contentMap[subTitle] || "这里是子栏目的详细内容";
                 
                 // 显示子栏目内容区
                 document.getElementById('subContent').style.display = 'block';
+                
+                // 隐藏首页内容
+                document.getElementById('homeContent').style.display = 'none';
                 
                 // 在移动设备上关闭侧边栏
                 if (window.innerWidth <= 768) {

@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>企业网站管理系统 - 优化重构版</title>
+    <title>企业网站管理系统 - 多媒体支持版</title>
     <style>
         /* ========== 全局样式重置 ========== */
         * {
@@ -412,9 +411,156 @@
         body.night-mode #adminLoginBtn {
             background: #4d9de0;
         }
+        .media-container {
+            position: relative;
+            display: inline-block;
+            margin: 10px 0;
+            max-width: 100%;
+        }
+        
+        .media-controls {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 5px;
+            display: none;
+            border-radius: 0 0 0 5px;
+            z-index: 10;
+        }
+        
+        .editing .media-container:hover .media-controls {
+            display: block;
+        }
+        
+        .media-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            margin: 0 3px;
+            font-size: 14px;
+        }
+        
+        .media-btn:hover {
+            color: #3498db;
+        }
+        
+        .media-placeholder {
+            width: 100%;
+            min-height: 150px;
+            background-color: #f5f5f5;
+            border: 2px dashed #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 14px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        
+        .media-placeholder:hover {
+            border-color: #3498db;
+        }
+        
+        .media-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .media-modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        body.night-mode .media-modal-content {
+            background: #2c3e50;
+            color: #e0e0e0;
+        }
+        
+        .media-tabs {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .media-tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+        
+        .media-tab.active {
+            border-bottom: 2px solid #3498db;
+            color: #3498db;
+        }
+        
+        .media-tab-content {
+            display: none;
+        }
+        
+        .media-tab-content.active {
+            display: block;
+        }
+        
+        .media-preview {
+            max-width: 100%;
+            max-height: 300px;
+            margin: 10px auto;
+            display: block;
+        }
+        
+        .media-upload-area {
+            border: 2px dashed #3498db;
+            border-radius: 5px;
+            padding: 20px;
+            text-align: center;
+            margin: 15px 0;
+            cursor: pointer;
+        }
+        
+        .media-upload-area:hover {
+            background: rgba(52, 152, 219, 0.1);
+        }
+        
+        .media-file-input {
+            display: none;
+        }
+        
+        .media-url-input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .media-size-slider {
+            width: 100%;
+            margin: 15px 0;
+        }
+        
+        .media-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 15px;
+        }
     </style>
 </head>
-
 <body>
     <button id="modeToggle">夜间模式</button>
 
@@ -519,7 +665,59 @@
     <div class="status-bar">
         <span id="statusText">就绪</span> | 企业网站管理系统 v2.0 | 最后保存: <span id="lastSaved">未保存</span>
     </div>
-
+    <div class="media-modal" id="mediaModal">
+        <div class="media-modal-content">
+            <div class="media-tabs">
+                <div class="media-tab active" data-tab="image">图片</div>
+                <div class="media-tab" data-tab="video">视频</div>
+            </div>
+            
+            <div id="imageTab" class="media-tab-content active">
+                <h3>添加/编辑图片</h3>
+                <div id="imagePreviewContainer">
+                    
+                </div>
+                <div class="media-upload-area" id="imageUploadArea">
+                    <p>点击上传图片或将图片拖拽到此处</p>
+                    <input type="file" id="imageFileInput" class="media-file-input" accept="image/*">
+                </div>
+                <p class="subtitle">或输入图片URL</p>
+                <input type="text" id="imageUrlInput" class="media-url-input" placeholder="https://example.com/image.jpg">
+                <div>
+                    <label>图片尺寸: <span id="imageSizeValue">100%</span></label>
+                    <input type="range" min="30" max="100" value="100" class="media-size-slider" id="imageSizeSlider">
+                </div>
+                <div class="media-actions">
+                    <button id="cancelImageBtn" class="action-btn">取消</button>
+                    <button id="saveImageBtn" class="action-btn">插入图片</button>
+                </div>
+            </div>
+            
+            <div id="videoTab" class="media-tab-content">
+                <h3>添加/编辑视频</h3>
+                <div id="videoPreviewContainer">
+                    <video id="videoPreview" class="media-preview" controls>
+                        您的浏览器不支持视频标签
+                    </video>
+                </div>
+                <div class="media-upload-area" id="videoUploadArea">
+                    <p>点击上传视频或将视频拖拽到此处</p>
+                    <input type="file" id="videoFileInput" class="media-file-input" accept="video/*">
+                </div>
+                <p class="subtitle">或输入视频URL</p>
+                <input type="text" id="videoUrlInput" class="media-url-input" placeholder="https://example.com/video.mp4">
+                <div>
+                    <label>视频尺寸: <span id="videoSizeValue">100%</span></label>
+                    <input type="range" min="30" max="100" value="100" class="media-size-slider" id="videoSizeSlider">
+                </div>
+                <div class="media-actions">
+                    <button id="cancelVideoBtn" class="action-btn">取消</button>
+                    <button id="saveVideoBtn" class="action-btn">插入视频</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <script>
         // ========== 页面加载后执行 ==========
         document.addEventListener('DOMContentLoaded', function () {
@@ -560,14 +758,14 @@
             function openMobileMenu() {
                 sidebar.classList.add('mobile-open');
                 overlay.classList.add('active');
-                document.body.style.overflow = 'hidden'; // 防止页面滚动
+                document.body.style.overflow = 'hidden';
             }
 
             // 关闭移动端菜单
             function closeMobileMenu() {
                 sidebar.classList.remove('mobile-open');
                 overlay.classList.remove('active');
-                document.body.style.overflow = ''; // 恢复页面滚动
+                document.body.style.overflow = '';
             }
 
             mobileMenuBtn.addEventListener('click', openMobileMenu);
@@ -601,8 +799,7 @@
                     adminPanel.style.display = "block";
                     adminLoginBtn.style.display = "none";
                     updateStatus("管理员已登录");
-                    localStorage.setItem('isAdmin', 'true');
-                } else if (password !== null) { // 只有当用户输入了密码(不是点击取消)才显示错误
+                } else if (password !== null) {
                     alert("密码错误!");
                 }
             }
@@ -624,24 +821,56 @@
                 cancelBtn.style.display = "inline-block";
                 editBtn.style.display = "none";
                 updateStatus("编辑模式已激活");
+                
+                // 添加媒体占位符
+                createMediaPlaceholders();
+                
+                // 为现有媒体元素添加控制按钮
+                document.querySelectorAll('.editable.editing .media-container').forEach(container => {
+                    if (!container.querySelector('.media-controls')) {
+                        const mediaElement = container.querySelector('img, video');
+                        if (!mediaElement) return;
+                        
+                        const controls = document.createElement('div');
+                        controls.className = 'media-controls';
+                        
+                        const editBtn = document.createElement('button');
+                        editBtn.className = 'media-btn';
+                        editBtn.innerHTML = '✎';
+                        editBtn.title = '编辑';
+                        editBtn.onclick = function() {
+                            openMediaModal(mediaElement, mediaElement.tagName.toLowerCase());
+                        };
+                        
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.className = 'media-btn';
+                        deleteBtn.innerHTML = '×';
+                        deleteBtn.title = '删除';
+                        deleteBtn.onclick = function() {
+                            container.remove();
+                        };
+                        
+                        controls.appendChild(editBtn);
+                        controls.appendChild(deleteBtn);
+                        
+                        container.appendChild(controls);
+                    }
+                });
             }
 
             // 保存编辑内容
             async function saveContent() {
                 try {
-                    const page = window.location.pathname.includes('products') ? 'products' : 'home';
-                    const content = {
-                        title: document.querySelector('[data-editable="title"]').innerText,
-                        content: document.querySelector('[data-editable="content"]').innerHTML
-                    };
-
-                    // 模拟保存到本地存储
-                    localStorage.setItem('cmsContent', JSON.stringify(content));
-                    
                     document.querySelectorAll(".editable").forEach(element => {
                         element.contentEditable = false;
                         element.classList.remove('editing');
                     });
+                    
+                    // 移除媒体占位符
+                    document.querySelectorAll('.editable .media-placeholder').forEach(placeholder => {
+                        placeholder.remove();
+                    });
+                    
                     saveBtn.style.display = "none";
                     cancelBtn.style.display = "none";
                     editBtn.style.display = "inline-block";
@@ -664,7 +893,18 @@
                 document.querySelectorAll(".editable").forEach(element => {
                     element.contentEditable = false;
                     element.classList.remove('editing');
+                    
+                    // 恢复原始内容
+                    if (element.id === "homeContent") {
+                        element.innerHTML = "欢迎访问我们的企业网站！这里可以展示公司最新动态和重要信息。企业网站管理系统让您轻松管理网站内容，无需技术背景即可完成内容更新与维护。";
+                    }
                 });
+                
+                // 移除媒体占位符
+                document.querySelectorAll('.editable .media-placeholder').forEach(placeholder => {
+                    placeholder.remove();
+                });
+                
                 saveBtn.style.display = "none";
                 cancelBtn.style.display = "none";
                 editBtn.style.display = "inline-block";
@@ -822,36 +1062,387 @@
             updateStatus("系统已就绪");
             document.getElementById('lastSaved').textContent = "未保存";
 
-            // 检查是否已经是管理员
-            if (localStorage.getItem('isAdmin') === 'true') {
-                adminPanel.style.display = "block";
-                adminLoginBtn.style.display = "none";
-            }
-
-            // 加载初始内容
-            loadInitialContent();
-        });
-
-        // ========== 数据操作函数 ==========
-
-        // 加载初始内容
-        async function loadInitialContent() {
-            try {
-                const savedContent = localStorage.getItem('cmsContent');
-                if (savedContent) {
-                    const content = JSON.parse(savedContent);
-                    if (content.title) {
-                        document.querySelector('[data-editable="title"]').innerText = content.title;
+            // ========== 媒体编辑功能 ==========
+            let currentEditingElement = null;
+            const mediaModal = document.getElementById('mediaModal');
+            const mediaTabs = document.querySelectorAll('.media-tab');
+            const mediaTabContents = document.querySelectorAll('.media-tab-content');
+            const imageSizeSlider = document.getElementById('imageSizeSlider');
+            const videoSizeSlider = document.getElementById('videoSizeSlider');
+            const imageSizeValue = document.getElementById('imageSizeValue');
+            const videoSizeValue = document.getElementById('videoSizeValue');
+            const imageUrlInput = document.getElementById('imageUrlInput');
+            const videoUrlInput = document.getElementById('videoUrlInput');
+            const imageFileInput = document.getElementById('imageFileInput');
+            const videoFileInput = document.getElementById('videoFileInput');
+            const imageUploadArea = document.getElementById('imageUploadArea');
+            const videoUploadArea = document.getElementById('videoUploadArea');
+            const saveImageBtn = document.getElementById('saveImageBtn');
+            const saveVideoBtn = document.getElementById('saveVideoBtn');
+            const cancelImageBtn = document.getElementById('cancelImageBtn');
+            const cancelVideoBtn = document.getElementById('cancelVideoBtn');
+            
+            // 打开媒体编辑模态框
+            function openMediaModal(element, mediaType = 'image') {
+                currentEditingElement = element;
+                mediaModal.style.display = 'flex';
+                
+                // 激活指定标签页
+                mediaTabs.forEach(tab => tab.classList.remove('active'));
+                mediaTabContents.forEach(content => content.classList.remove('active'));
+                
+                if (mediaType === 'image') {
+                    document.querySelector('.media-tab[data-tab="image"]').classList.add('active');
+                    document.getElementById('imageTab').classList.add('active');
+                    
+                    // 重置表单
+                    imagePreview.src = '';
+                    imageUrlInput.value = '';
+                    imageSizeSlider.value = 100;
+                    imageSizeValue.textContent = '100%';
+                    
+                    // 如果编辑现有图片，加载数据
+                    if (element && element.tagName === 'IMG') {
+                        imagePreview.src = element.src;
+                        imageUrlInput.value = element.src;
+                        const width = parseInt(element.style.width) || 100;
+                        imageSizeSlider.value = width;
+                        imageSizeValue.textContent = `${width}%`;
                     }
-                    if (content.content) {
-                        document.querySelector('[data-editable="content"]').innerHTML = content.content;
+                } else {
+                    document.querySelector('.media-tab[data-tab="video"]').classList.add('active');
+                    document.getElementById('videoTab').classList.add('active');
+                    
+                    // 重置表单
+                    videoPreview.src = '';
+                    videoUrlInput.value = '';
+                    videoSizeSlider.value = 100;
+                    videoSizeValue.textContent = '100%';
+                    
+                    // 如果编辑现有视频，加载数据
+                    if (element && element.tagName === 'VIDEO') {
+                        videoPreview.src = element.src;
+                        videoUrlInput.value = element.src;
+                        const width = parseInt(element.style.width) || 100;
+                        videoSizeSlider.value = width;
+                        videoSizeValue.textContent = `${width}%`;
                     }
                 }
-            } catch (error) {
-                console.error('加载内容失败:', error);
             }
-        }
+            
+            // 关闭媒体编辑模态框
+            function closeMediaModal() {
+                mediaModal.style.display = 'none';
+                currentEditingElement = null;
+            }
+            
+            // 标签页切换
+            mediaTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    mediaTabs.forEach(t => t.classList.remove('active'));
+                    mediaTabContents.forEach(c => c.classList.remove('active'));
+                    
+                    this.classList.add('active');
+                    document.getElementById(`${tabId}Tab`).classList.add('active');
+                });
+            });
+            
+            // 图片尺寸滑块事件
+            imageSizeSlider.addEventListener('input', function() {
+                imageSizeValue.textContent = `${this.value}%`;
+            });
+            
+            // 视频尺寸滑块事件
+            videoSizeSlider.addEventListener('input', function() {
+                videoSizeValue.textContent = `${this.value}%`;
+            });
+            
+            // 图片URL输入事件
+            imageUrlInput.addEventListener('input', function() {
+                imagePreview.src = this.value;
+            });
+            
+            // 视频URL输入事件
+            videoUrlInput.addEventListener('input', function() {
+                videoPreview.src = this.value;
+            });
+            
+            // 图片上传区域点击事件
+            imageUploadArea.addEventListener('click', function() {
+                imageFileInput.click();
+            });
+            
+            // 视频上传区域点击事件
+            videoUploadArea.addEventListener('click', function() {
+                videoFileInput.click();
+            });
+            
+            // 图片文件选择事件
+            imageFileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        imagePreview.src = event.target.result;
+                        imageUrlInput.value = ''; // 清除URL输入
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // 视频文件选择事件
+            videoFileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file && file.type.startsWith('video/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        videoPreview.src = event.target.result;
+                        videoUrlInput.value = ''; // 清除URL输入
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // 保存图片
+            saveImageBtn.addEventListener('click', function() {
+                const url = imageUrlInput.value || imagePreview.src;
+                const width = imageSizeSlider.value;
+                
+                if (!url) {
+                    alert('请提供图片URL或上传图片');
+                    return;
+                }
+                
+                let imgElement;
+                if (currentEditingElement && currentEditingElement.tagName === 'IMG') {
+                    // 更新现有图片
+                    imgElement = currentEditingElement;
+                    imgElement.src = url;
+                    imgElement.style.width = `${width}%`;
+                } else {
+                    // 创建新图片元素
+                    imgElement = document.createElement('img');
+                    imgElement.src = url;
+                    imgElement.alt = "企业图片";
+                    imgElement.style.width = `${width}%`;
+                    
+                    // 创建容器和控制按钮
+                    const container = document.createElement('div');
+                    container.className = 'media-container';
+                    
+                    const controls = document.createElement('div');
+                    controls.className = 'media-controls';
+                    
+                    const editBtn = document.createElement('button');
+                    editBtn.className = 'media-btn';
+                    editBtn.innerHTML = '✎';
+                    editBtn.title = '编辑';
+                    editBtn.onclick = function() {
+                        openMediaModal(imgElement, 'image');
+                    };
+                    
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'media-btn';
+                    deleteBtn.innerHTML = '×';
+                    deleteBtn.title = '删除';
+                    deleteBtn.onclick = function() {
+                        container.remove();
+                    };
+                    
+                    controls.appendChild(editBtn);
+                    controls.appendChild(deleteBtn);
+                    
+                    container.appendChild(imgElement);
+                    container.appendChild(controls);
+                    
+                    // 插入到内容区域
+                    if (currentEditingElement) {
+                        // 替换占位符
+                        currentEditingElement.replaceWith(container);
+                    } else {
+                        // 添加到当前编辑区域
+                        const editingElement = document.querySelector('.editable.editing');
+                        if (editingElement) {
+                            editingElement.appendChild(container);
+                        } else {
+                            // 添加到首页内容
+                            document.getElementById('homeContent').appendChild(container);
+                        }
+                    }
+                }
+                
+                closeMediaModal();
+                updateStatus('图片已添加');
+            });
+            
+            // 保存视频
+            saveVideoBtn.addEventListener('click', function() {
+                const url = videoUrlInput.value || videoPreview.src;
+                const width = videoSizeSlider.value;
+                
+                if (!url) {
+                    alert('请提供视频URL或上传视频');
+                    return;
+                }
+                
+                let videoElement;
+                if (currentEditingElement && currentEditingElement.tagName === 'VIDEO') {
+                    // 更新现有视频
+                    videoElement = currentEditingElement;
+                    videoElement.src = url;
+                    videoElement.style.width = `${width}%`;
+                } else {
+                    // 创建新视频元素
+                    videoElement = document.createElement('video');
+                    videoElement.src = url;
+                    videoElement.controls = true;
+                    videoElement.style.width = `${width}%`;
+                    
+                    // 创建容器和控制按钮
+                    const container = document.createElement('极光');
+                    container.className = 'media-container';
+                    
+                    const controls = document.createElement('div');
+                    controls.className = 'media-controls';
+                    
+                    const editBtn = document.createElement('button');
+                    editBtn.className = 'media-btn';
+                    editBtn.innerHTML = '✎';
+                    editBtn.title = '编辑';
+                    editBtn.onclick = function() {
+                        openMediaModal(videoElement, 'video');
+                    };
+                    
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'media-btn';
+                    deleteBtn.innerHTML = '×';
+                    deleteBtn.title = '删除';
+                    deleteBtn.onclick = function() {
+                        container.remove();
+                    };
+                    
+                    controls.appendChild(editBtn);
+                    controls.appendChild(deleteBtn);
+                    
+                    container.appendChild(videoElement);
+                    container.appendChild(controls);
+                    
+                    // 插入到内容区域
+                    if (currentEditingElement) {
+                        // 替换占位符
+                        currentEditingElement.replaceWith(container);
+                    } else {
+                        // 添加到当前编辑区域
+                        const editingElement = document.querySelector('.editable.editing');
+                        if (editingElement) {
+                            editingElement.appendChild(container);
+                        } else {
+                            // 添加到首页内容
+                            document.getElementById('homeContent').appendChild(container);
+                        }
+                    }
+                }
+                
+                closeMediaModal();
+                updateStatus('视频已添加');
+            });
+            
+            // 取消按钮事件
+            cancelImageBtn.addEventListener('click', closeMediaModal);
+            cancelVideoBtn.addEventListener('click', closeMediaModal);
+            
+            // 关闭模态框（点击外部）
+            mediaModal.addEventListener('click', function(e) {
+                if (e.target === mediaModal) {
+                    closeMediaModal();
+                }
+            });
+            
+            // 在编辑模式下添加媒体占位符
+            function createMediaPlaceholders() {
+                document.querySelectorAll('.editable').forEach(editable => {
+                    if (editable.classList.contains('editing')) {
+                        // 删除现有占位符
+                        editable.querySelectorAll('.media-placeholder').forEach(ph => ph.remove());
+                        
+                        // 添加新的图片占位符
+                        const imgPlaceholder = document.createElement('div');
+                        imgPlaceholder.className = 'media-placeholder';
+                        imgPlaceholder.textContent = '+ 添加图片';
+                        imgPlaceholder.onclick = function() {
+                            openMediaModal(imgPlaceholder, 'image');
+                        };
+                        
+                        // 添加新的视频占位符
+                        const videoPlaceholder = document.createElement('div');
+                        videoPlaceholder.className = 'media-placeholder';
+                        videoPlaceholder.textContent = '+ 添加视频';
+                        videoPlaceholder.onclick = function() {
+                            openMediaModal(videoPlaceholder, 'video');
+                        };
+                        
+                        // 插入到内容开头
+                        editable.prepend(imgPlaceholder);
+                        editable.prepend(videoPlaceholder);
+                    }
+                });
+            }
+            
+            // 修改现有进入编辑模式函数
+            const originalEnterEditMode = enterEditMode;
+            enterEditMode = function() {
+                originalEnterEditMode();
+                createMediaPlaceholders();
+                
+                // 为现有媒体元素添加控制按钮
+                document.querySelectorAll('.editable.editing .media-container').forEach(container => {
+                    if (!container.querySelector('.media-controls')) {
+                        const mediaElement = container.querySelector('img, video');
+                        if (!mediaElement) return;
+                        
+                        const controls = document.createElement('div');
+                        controls.className = 'media-controls';
+                        
+                        const editBtn = document.createElement('button');
+                        editBtn.className = 'media-btn';
+                        editBtn.innerHTML = '✎';
+                        editBtn.title = '编辑';
+                        editBtn.onclick = function() {
+                            openMediaModal(mediaElement, mediaElement.tagName.toLowerCase());
+                        };
+                        
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.className = 'media-btn';
+                        deleteBtn.innerHTML = '×';
+                        deleteBtn.title = '删除';
+                        deleteBtn.onclick = function() {
+                            container.remove();
+                        };
+                        
+                        controls.appendChild(editBtn);
+                        controls.appendChild(deleteBtn);
+                        
+                        container.appendChild(controls);
+                    }
+                });
+            };
+            
+            // 修改现有保存内容函数以支持多媒体
+            const originalSaveContent = saveContent;
+            saveContent = async function() {
+                createMediaPlaceholders(); // 移除编辑模式的占位符
+                await originalSaveContent();
+            };
+            
+            // 修改现有取消编辑函数
+            const originalCancelEdit = cancelEdit;
+            cancelEdit = function() {
+                createMediaPlaceholders(); // 移除编辑模式的占位符
+                originalCancelEdit();
+            };
+        });
     </script>
 </body>
-
 </html>
